@@ -3,19 +3,23 @@ package com.quandev.identityservice.controller;
 import com.quandev.identityservice.dto.request.ApiResponse;
 import com.quandev.identityservice.dto.request.UserCreationRequest;
 import com.quandev.identityservice.dto.request.UserUpdateRequest;
+import com.quandev.identityservice.dto.response.UserResponse;
 import com.quandev.identityservice.entity.IUser;
 import com.quandev.identityservice.service.UserService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/users")
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserController {
-    @Autowired
-    private UserService userService;
+    UserService userService;
 
     @PostMapping
     ApiResponse<IUser> createUser(@RequestBody @Valid UserCreationRequest request) {
@@ -32,12 +36,12 @@ public class UserController {
     }
 
     @GetMapping("/{userId}")
-    IUser getUser(@PathVariable("userId") String userId) {
+    UserResponse getUser(@PathVariable("userId") String userId) {
         return userService.getUser(userId);
     }
 
     @PutMapping("/{userId}")
-    IUser updateUser(@RequestBody UserUpdateRequest request, @PathVariable("userId") String userId) {
+    UserResponse updateUser(@RequestBody UserUpdateRequest request, @PathVariable("userId") String userId) {
         return userService.updateUser(userId, request);
     }
 

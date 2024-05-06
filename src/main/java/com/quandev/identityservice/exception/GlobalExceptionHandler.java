@@ -8,12 +8,12 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
-    @ExceptionHandler(value = RuntimeException.class)
+    @ExceptionHandler(value = Exception.class)
     ResponseEntity<ApiResponse> handlingRuntimeException(RuntimeException exception) {
         ApiResponse apiResponse = new ApiResponse();
 
-        apiResponse.setCode(1001);
-        apiResponse.setMessage(exception.getMessage());
+        apiResponse.setCode(ErrorCode.UNCATEGORIZED_EXCEPTION.getCode());
+        apiResponse.setMessage(ErrorCode.UNCATEGORIZED_EXCEPTION.getMessage());
 
         return ResponseEntity.badRequest().body(apiResponse);
     }
@@ -31,10 +31,16 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
     ResponseEntity<ApiResponse> handlingMethodArgumentNotValidException(MethodArgumentNotValidException exception) {
+        ErrorCode errorCode = ErrorCode.INVALID_KEY;
+        try {
+            errorCode = ErrorCode.valueOf(exception.getFieldError().getDefaultMessage());
+        } catch (IllegalArgumentException e) {
+
+        }
         ApiResponse apiResponse = new ApiResponse();
 
-        apiResponse.setCode(1001);
-        apiResponse.setMessage(exception.getFieldError().getDefaultMessage());
+        apiResponse.setCode(errorCode.getCode());
+        apiResponse.setMessage(errorCode.getMessage());
 
         return ResponseEntity.badRequest().body(apiResponse);
     }
