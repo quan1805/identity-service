@@ -4,6 +4,7 @@ import com.quandev.identityservice.dto.request.UserCreationRequest;
 import com.quandev.identityservice.dto.request.UserUpdateRequest;
 import com.quandev.identityservice.dto.response.UserResponse;
 import com.quandev.identityservice.entity.IUser;
+import com.quandev.identityservice.enums.Role;
 import com.quandev.identityservice.exception.AppException;
 import com.quandev.identityservice.exception.ErrorCode;
 import com.quandev.identityservice.mapper.UserMapper;
@@ -15,6 +16,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
 
 @Service
@@ -23,14 +25,19 @@ import java.util.List;
 public class UserService {
     UserRepository userRepository;
     UserMapper userMapper;
+    PasswordEncoder passwordEncoder;
 
     public IUser createUser(UserCreationRequest request) {
         if (userRepository.existsByUsername(request.getUsername()))
             throw new AppException(ErrorCode.USER_EXISTED);
 
         IUser user = userMapper.toUser(request);
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
+
+        HashSet<String> roles = new HashSet<>();
+        roles.add(Role.USER.name());
+
+        user.setRoles(roles);
 
         return userRepository.save(user);
     }
