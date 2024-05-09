@@ -26,8 +26,8 @@ public class UserController {
     UserService userService;
 
     @PostMapping
-    ApiResponse<IUser> createUser(@RequestBody @Valid UserCreationRequest request) {
-        ApiResponse<IUser> apiResponse = new ApiResponse<>();
+    ApiResponse<UserResponse> createUser(@RequestBody @Valid UserCreationRequest request) {
+        ApiResponse<UserResponse> apiResponse = new ApiResponse<>();
 
         apiResponse.setResult(userService.createUser(request));
 
@@ -35,18 +35,22 @@ public class UserController {
     }
 
     @GetMapping
-    List<IUser> getUsers() {
+    ApiResponse<List<UserResponse>> getUsers() {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
 
         log.info("Username: {}", authentication.getName());
         authentication.getAuthorities().forEach(grantedAuthority -> log.info(grantedAuthority.getAuthority()));
 
-        return userService.getUsers();
+        return ApiResponse.<List<UserResponse>>builder()
+                .result(userService.getUsers())
+                .build();
     }
 
     @GetMapping("/{userId}")
-    UserResponse getUser(@PathVariable("userId") String userId) {
-        return userService.getUser(userId);
+    ApiResponse<UserResponse> getUser(@PathVariable("userId") String userId) {
+        return ApiResponse.<UserResponse>builder()
+                .result(userService.getUser(userId))
+                .build();
     }
 
     @GetMapping("/myInfo")
@@ -57,14 +61,18 @@ public class UserController {
     }
 
     @PutMapping("/{userId}")
-    UserResponse updateUser(@RequestBody UserUpdateRequest request, @PathVariable("userId") String userId) {
-        return userService.updateUser(userId, request);
+    ApiResponse<UserResponse> updateUser(@RequestBody UserUpdateRequest request, @PathVariable("userId") String userId) {
+        return ApiResponse.<UserResponse>builder()
+                .result(userService.updateUser(userId, request))
+                .build();
     }
 
     @DeleteMapping("/{userId}")
-    String deleteUser(@PathVariable("userId") String userId) {
+    ApiResponse<UserResponse> deleteUser(@PathVariable("userId") String userId) {
         userService.deleteUser(userId);
-        return "User has been deleted";
+        return ApiResponse.<UserResponse>builder()
+                .message("User has been deleted")
+                .build();
     }
 
 }

@@ -32,7 +32,7 @@ public class UserService {
     UserMapper userMapper;
     PasswordEncoder passwordEncoder;
 
-    public IUser createUser(UserCreationRequest request) {
+    public UserResponse createUser(UserCreationRequest request) {
         if (userRepository.existsByUsername(request.getUsername()))
             throw new AppException(ErrorCode.USER_EXISTED);
 
@@ -44,7 +44,7 @@ public class UserService {
 
         user.setRoles(roles);
 
-        return userRepository.save(user);
+        return userMapper.toUserResponse(userRepository.save(user));
     }
 
     public UserResponse getMyInfo() {
@@ -70,12 +70,12 @@ public class UserService {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    public List<IUser> getUsers() {
+    public List<UserResponse> getUsers() {
         log.info("In method get Users ");
-        return userRepository.findAll();
+        return userMapper.toListUserResponse(userRepository.findAll());
     }
 
-    @PostAuthorize("returnObject.username == authentication.name')")
+    @PostAuthorize("returnObject.username == authentication.name")
     public UserResponse getUser(String id) {
         log.info("In method get by userId");
         return userMapper.toUserResponse(userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found")));
